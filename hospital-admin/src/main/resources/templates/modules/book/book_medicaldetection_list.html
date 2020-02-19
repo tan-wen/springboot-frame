@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>医技科室预约查询</title>
+    <#include "/header.html">
+    <link rel="stylesheet" href="${request.contextPath}/statics/plugins/element-ui/index.css">
+    <style>
+        body {
+            margin: 0;
+        }
+
+        .el-row {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .el-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .g-hd {
+            magin-bottom: 10px;
+            padding: 0 0 10px 0;
+            color: #303133;
+            font-size: 18px;
+            border-bottom: 1px solid #DCDFE6;
+        }
+
+        .box-card > .el-card__header {
+            position: relative;
+            padding: 10px;
+        }
+
+        .u-refresh {
+            float: right;
+        }
+
+        .u-refresh > strong {
+            margin: 0 0 0 10px;
+            color: #ff0000;
+        }
+
+        .el-container {
+            flex-wrap: wrap;
+        }
+
+        .f-df {
+            display: flex;
+        }
+
+        .f-dfc {
+            display: flex;
+            justify-content: center;
+        }
+
+        .f-dfsb {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .f-dfr {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .box-card {
+            margin-bottom: 15px;
+        }
+
+        .box-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .u-box {
+            padding: 10px;
+            border-bottom: 1px solid #EBEEF5;
+        }
+
+        .patientArr {
+            padding: 5px 10px;
+        }
+
+        .u-inf {
+            display: flex;
+            flex: 1;
+        }
+
+        .u-inf > span {
+            display: inline-block;
+            width: 150px;
+            margin: 0 30px 0 20px;
+            padding: 0 5px;
+            color: #909090;
+            border-bottom: 1px solid #606266;
+        }
+
+        .u-inf > input {
+            display: inline-block;
+            width: 120px;
+            color: #909090;
+            background-color: transparent;
+            border-top: 0px;
+            border-left: 0px;
+            border-right: 0px;
+            border-bottom: 1px solid #606266;
+        }
+
+        @media (max-width: 1440px) {
+            .u-inf > span {
+                width: 100px;
+                padding: 0;
+            }
+        }
+
+        .mb10 {
+            margin-bottom: 10px;
+        }
+
+        .ml10 {
+            margin-left: 10px;
+        }
+
+        .btn_group {
+            position: absolute;
+            top: 7px;
+            left: 110px;
+        }
+
+        .date_group {
+            position: absolute;
+            top: 7px;
+            right: 20px;
+            padding-left: 10px;
+            border-left: 1px solid #909399;
+        }
+
+        .week_group {
+            margin-bottom: 10px;
+            padding: 0 50px;
+        }
+
+        .u-icon {
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .weekday {
+            padding: 0 20px;
+            text-align: center;
+            font-size: 12px;
+            border: 1px solid #909399;
+            cursor: pointer;
+        }
+
+        .weekday.active {
+            background: #909399;
+            color: #fff;
+        }
+
+        .wp-list .active {
+            background: #909399;
+            color: #fff;
+        }
+
+        .weekday > p {
+            margin: 5px 0;
+        }
+
+        .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td, .table > thead > tr > th {
+            padding: 4px;
+            line-height: 1.42857143;
+            vertical-align: top;
+            border-top: 1px solid #ddd;
+        }
+
+        .el-radio-group > .el-radio {
+            margin: 6px 0 6px 0;
+        }
+
+        .active {
+            background: #2d8cf0;
+        }
+
+        .active a {
+            color: #fff !important;
+        }
+
+        .ul {
+            list-style: none;
+        }
+
+        .ul li {
+            float: left;
+            line-height: 28px;
+            width: 55px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            height: 30px;
+            text-align: center;
+            margin: 5px
+        }
+
+        .ul li.disabled {
+            color: #333
+        }
+
+        .ul li a {
+            color: #333
+        }
+
+
+    </style>
+</head>
+<body>
+<div id="app">
+    <el-container>
+        <el-row :gutter="15" class="f-df">
+            <el-col :span="20">
+                <el-card class="box-card" :body-style="{ padding: '10px' }">
+                    <div slot="header">
+                        <i class="el-icon-menu"></i>
+                        <span>查询筛选</span>
+                    </div>
+                    <div class="f-dfsb mb10">
+                        <div class="u-inf">患者来源:
+                            <el-select v-model="patientSource" placeholder="请选择">
+                                <el-option
+                                        v-for="item in patientSources"
+                                        :value="item.value"
+                                        :label="item.desc">
+                                </el-option>
+                            </el-select>
+                        </div>
+                        <div class="u-inf">检查项目:
+                            <el-select v-model="bookItem" placeholder="请选择">
+                                <el-option
+                                        v-for="item in bookItems"
+                                        :value="item.id"
+                                        :label="item.name">
+                                </el-option>
+                            </el-select>
+                        </div>
+                        <div class="u-inf">预约状态:
+                            <el-select v-model="payStatus" placeholder="请选择">
+                                <el-option
+                                        v-for="item in payStatusList"
+                                        :value="item.value"
+                                        :label="item.desc">
+                                </el-option>
+                            </el-select>
+                        </div>
+                    </div>
+                    <div class="f-dfsb mb10">
+                        <div class="u-inf">患者ID:<span></span></div>
+                        <div class="u-inf">申请单ID:<span></span></div>
+                        <div class="u-inf">所属病区:
+                            <el-select v-model="baseInpatientArea" placeholder="请选择">
+                                <el-option
+                                        v-for="item in baseInpatientAreas"
+                                        :value="item.id"
+                                        :label="item.name">
+                                </el-option>
+                            </el-select>
+                        </div>
+                        <div class="u-inf">来源外部单位:<span></span></div>
+                        <!--<div class="u-inf" contenteditable="true">手机号:<span>{{inpatient.phone}}</span></div>-->
+                        <!-- <div class="u-inf">手机:<input style="margin-left: 20px; width: 100px;" type="text"
+                                                      v-model="inpatient.phone"/></div>-->
+                    </div>
+
+                    <div class="f-dfsb mb10">
+                        <div class="u-inf">预约日期:
+                            <div class="f-dfc u-box">
+                                <el-date-picker id="startDate" name="startDate"
+                                                size="small"
+                                                value-format="yyyy-MM-dd"
+                                                type="date"
+                                                placeholder="选择日期" style="width: 100%">
+                                </el-date-picker>
+                            </div>
+                        </div>
+                        <div class="u-inf">预约时间:<span></span></div>
+                    </div>
+                    <div class="f-dfr">
+                        <el-button type="danger" size="medium">保存
+                        </el-button>
+                        <el-button type="danger" size="medium">清空
+                        </el-button>
+                        <el-button type="danger" size="medium">导出
+                        </el-button>
+                    </div>
+                </el-card>
+            </el-col>
+        </el-row>
+
+    </el-container>
+
+</div>
+</body>
+<script src="${request.contextPath}/statics/plugins/element-ui/vue.min.js"></script>
+<script src="${request.contextPath}/statics/plugins/element-ui/index.js"></script>
+<script src="${request.contextPath}/statics/libs/validator.js"></script>
+<script>
+    var initDetectionDepId = getURLParameter("detectionDepId");
+    var vm = new Vue({
+        el: '#app',
+        data: function () {
+            return {
+                patientSources: [],
+                patientSource: '',
+                bookItems: [],
+                bookItem: '',
+                baseInpatientAreas: [],
+                baseInpatientArea: '',
+                /*预约状态*/
+                payStatusList: [],
+                payStatus: ''
+            }
+        },
+        created: function () {
+            this.init();
+        },
+        filters: {},
+        methods: {
+            init: function () {
+                this.getBookItems();
+                this.getPatientAreas();
+                /*获取患者来源和缴费状态*/
+                this.getPatientDetails();
+            },
+
+            getBookItems: function () {
+                $.ajax({
+                    url: baseURL + "book/bookitem/findByDetectionDeptId",
+                    data: {"detectionDeptId": initDetectionDepId},
+                    type: "post",
+                    dataType: "json",
+                    success: function (r) {
+                        if (r.code === 0) {
+                            vm.bookItems = r.bookItems;
+                        } else {
+                            toastr.info('获取book_item失败');
+                        }
+                    }
+                });
+            },
+
+            getPatientAreas: function () {
+                $.ajax({
+                    type: "POST",
+                    url: baseURL + "base/baseinpatientarea/all",
+                    contentType: "application/json",
+                    success: function (r) {
+                        if (r.code === 0) {
+                            vm.baseInpatientAreas = r.baseInpatientAreas;
+                        } else {
+                            toastr.info('获取病区失败');
+                        }
+                    }
+                });
+            },
+            getPatientDetails: function () {
+                $.ajax({
+                    type: "POST",
+                    url: baseURL + "book/bookmedicaldetectionlist/patientsources",
+                    contentType: "application/json",
+                    success: function (r) {
+                        if (r.code === 0) {
+                            vm.patientSources = r.patientSources;
+                            vm.payStatusList = r.payStatusList;
+                        } else {
+                            toastr.info('获取患者来源失败');
+                        }
+                    }
+                });
+            }
+        }
+    });
+
+</script>
+</html>

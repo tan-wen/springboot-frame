@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>号源配额详情临时表</title>
+    <#include "/header.html">
+    <link rel="stylesheet" href="${request.contextPath}/statics/plugins/element-ui/index.css">
+    <style type="text/css">
+        .week-btn {width: 10%; margin-right: 4%; margin-bottom: 10px;}
+        table td {vertical-align: middle !important;}
+        table input{width:100%;border: none;}
+        table input:focus{outline: none;}
+
+        .f-dfsb {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .week_group {
+            margin-bottom: 10px;
+            padding: 0 50px;
+        }
+
+        .weekday {
+            padding: 0 20px;
+            text-align: center;
+            font-size: 12px;
+            border: 1px solid #909399;
+            cursor: pointer;
+        }
+
+        .weekday.active {
+            background: #909399;
+            color: #fff;
+        }
+
+    </style>
+</head>
+<body>
+<div id="app">
+    <div>
+        <div class="col-sm-12" style="margin: 20px;" v-if="showDepSelect">
+            <select class="form-control" @change="switchDetectionDep" v-model="detectionDepId" >
+                <option value="">选择科室</option>
+                <option v-for="d in detectionDeps" :value="d.id">{{d.name}}</option>
+            </select>
+        </div>
+<!--        <button class="btn btn-default week-btn" :class="weekId == w.id ? 'active': ''"
+                v-for="(w,index) in weeks" @click="swithWeek(w.id)" >
+            {{w.value}}
+        </button>-->
+    <div class="week_group f-dfsb">
+        <i style="font-size: 35px;cursor: pointer;" class="el-icon-arrow-left u-icon" @click="changeWeek(-1)"></i>
+        <div class="weekday" v-for="(o,index) in dateAndWeek" :key="o.id"
+             @click="switchWeek(o.id,o.date)" :class="weekId == o.id ? 'active': ''">
+            <p>{{o.date|formatSliceDate}}</p>
+            <p>{{o.weekDay}}</p>
+        </div>
+        <i style="font-size: 35px;cursor: pointer;" class="el-icon-arrow-right u-icon" @click="changeWeek(1)"></i>
+    </div>
+        <table class="table table-bordered" style="text-align: center" v-for="item in quota.bookItems">
+            <tr>
+                <td>预约项目</td>
+                <td>病人来源</td>
+                <td v-for="slice in item.timeSlices" >{{slice.startTime | formatSlice}} - {{slice.endTime | formatSlice}}</td>
+            </tr>
+            <tr >
+                <td :rowspan="item.quotaCategories.length + 2">{{item.bookItemName}}</td>
+            </tr>
+            <tr v-for="qc in item.quotaCategories">
+                <td>{{qc.name}}</td>
+                <td v-for="slice in item.timeSlices">
+                    <input type="number"
+                           :value="item.map[weekId + '-' + slice.timeSliceId + '-' + qc.quotaCategoryId]"
+                           :data-quota-detail-id="item.idMap[weekId + '-' + slice.timeSliceId + '-' + qc.quotaCategoryId]"
+                           @change="configQuota($event, item.bookItemId, slice.timeSliceId, qc.quotaCategoryId)">
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+</body>
+<script src="${request.contextPath}/statics/plugins/element-ui/vue.min.js"></script>
+<script src="${request.contextPath}/statics/plugins/element-ui/index.js"></script>
+<script type="text/javascript">
+    var initDetectionDepId = getURLParameter("detectionDepId");
+    var vm = new Vue({
+        el: '#app',
+        data: {
+            value1: getCurrentDate(),
+            detectionDeps:[],
+            quota:{},
+            dateAndWeek: [],
+            weekId:"",
+            checkedDate: '', //选择的日期 格式为yyyy-mm-dd
+            startDateInweek: '',
+            detectionDepId: initDetectionDepId,
+            showDepSelect: !initDetectionDepId
+        },
+        created:function(){
+            this.init();
+        },
+        filters:{
+            formatSliceDate: function (str) {
+                return str.substring(0, 10);
+            },
+            formatSlice:function (str) {
+                return str.substring(0,5);
+            }
+        },
+        methods: {
+            init: function () {
+                var startDate = "";
+                this.checkedDate= this.value1;
+                this.getRecentDateAndWeek(startDate);
+                if (initDetectionDepId) {
+                    $.get(baseURL + "book/quotatemp/todayInfo?detectionId=" + initDetectionDepId, function (r) {
+                        vm.quota = r.quota;
+                    });
+                }
+                //如果没有传入配额类别initDetectionDepId,就加载搜索框选择
+                $.get(baseURL + "base/basedetectiondep/all", function (r) {
+                    vm.detectionDeps = r.detectionDeps;
+                });
+            },
+
+            getQuota: function(detectionDepId, weekId,checkedDate) {
+                $.get(baseURL + "book/quotatemp/info?detectionId=" + detectionDepId + "&weekId=" + weekId+"&checkedDate="+checkedDate, function (r) {
+                    vm.quota = r.quota;
+                })
+            },
+            switchDetectionDep: function (el) {
+                var detectionDepId = el.target.value;
+                if(!detectionDepId) {
+                    console.log("请选择合法的医技科室");
+                }
+                vm.detectionDepId = detectionDepId;
+                vm.getQuota(detectionDepId, vm.weekId);
+            },
+            swithWeek:function(id) {
+                vm.weekId = id;
+                vm.getQuota(vm.detectionDepId, id);
+            },
+            configQuota:function(event, bookItemId, timeSliceId, quotaCategoryId) {
+                var data = {
+                    "bookItemId" : bookItemId,
+                    "weekId" : this.weekId,
+                    "timeSliceId" : timeSliceId,
+                    "quotaCategoryId" : quotaCategoryId,
+                    "max" : event.target.value,
+                    "id" : event.target.getAttribute('data-quota-detail-id'),
+                    "fullTime":vm.checkedDate
+                };
+                $.ajax({
+                    type: "POST",
+                    url: baseURL + "/book/quotatemp/save",
+                    contentType: "application/json",
+                    data: JSON.stringify(data),
+                    success: function(r){
+                        if(r.code !== 0){
+                            alert(r.msg);
+                        }
+                    }
+                });
+            },
+            getRecentDateAndWeek: function (startDate) {
+                $.ajax({
+                    url: baseURL + "sys/dict/getRecentDateAndWeek",
+                    data: {"startDate": startDate},
+                    type: "post",
+                    dataType: "json",
+                    //async 设置为 false，则所有的请求均为同步请求，在没有返回值之前，同步请求将锁住浏览器，用户其它操作必须等待请求完成才可以执行。
+                    //async:false,
+                    success: function (r) {
+                        if (r.msg == 'success' && r.nextDaysList.length > 0) {
+                            vm.dateAndWeek = r.nextDaysList;
+                            vm.startDateInweek = r.nextDaysList[0].date;
+                            vm.weekId =r.selectDayWeekId;
+                        } else {
+                            toastr.info("未成功获得预约时间轴！")
+                        }
+                    },
+                    error: function () {
+                        toastr.error("查询时间轴出错,请重试后若不成功请联系管理员！")
+                    }
+                })
+            },
+
+            //异步请求,保证按顺序执行
+            changeWeek: function (a) {
+                if (a == 1) {
+                    var resultDate = getDateAfter_n(vm.startDateInweek, 7, '-');
+                } else {
+                    var resultDate = getDateAfter_n(vm.startDateInweek, -7, '-');
+                }
+                $.ajax({
+                    url: baseURL + "sys/dict/getRecentDateAndWeek",
+                    data: {"startDate": resultDate},
+                    type: "post",
+                    dataType: "json",
+                    //async 设置为 false，则所有的请求均为同步请求，在没有返回值之前，同步请求将锁住浏览器，用户其它操作必须等待请求完成才可以执行。
+                    //async:false,
+                    success: function (r) {
+                        if (r.msg == 'success' && r.nextDaysList.length > 0) {
+                            vm.dateAndWeek = r.nextDaysList;
+                            vm.startDateInweek = r.nextDaysList[0].date;
+                            vm.weekId =r.selectDayWeekId;
+                            $.get(baseURL + "book/quotatemp/info?detectionId=" + initDetectionDepId + "&weekId=" + vm.weekId+"&checkedDate="+resultDate, function (r) {
+                                vm.quota = r.quota;
+                            })
+                        } else {
+                            toastr.info("未成功获得预约时间轴！")
+                        }
+                    },
+                    error: function () {
+                        toastr.error("查询时间轴出错,请重试后若不成功请联系管理员！")
+                    }
+                })
+
+
+            },
+
+            switchWeek: function (id, checkDate) {
+                var checkedDate = checkDate.substring(0, 10);
+                var currentData=getCurrentDate();
+                if(checkedDate<currentData){
+                    toastr.warning("不可修改今日以前的号源！");
+                    return false;
+                }
+                vm.weekId = id;
+                vm.checkedDate =checkedDate;
+                vm.getQuota(vm.detectionDepId,id,vm.checkedDate);
+
+            },
+            getWeek:function () {
+                $.get(baseURL + "sys/dict/week", function (q) {
+                    vm.weeks = q.week;
+                });
+
+            }
+        }
+
+    });
+    //获取n天后的日期
+    function getDateAfter_n(initDate, days, flag) {
+        if (!days) {
+            return initDate;
+        }
+        initDate = initDate.replace(/-/g, '');
+        flag = $.trim(flag);
+        var date;
+        // 是否设置了起始日期
+        if (!$.trim(initDate)) { // 没有设置初始化日期，就默认为当前日期
+            date = new Date();
+        } else {
+            var year = initDate.substring(0, 4);
+            var month = initDate.substring(4, 6);
+            var day = initDate.substring(6, 8);
+            date = new Date(year, month - 1, day); // 月份是从0开始的
+        }
+        date.setDate(date.getDate() + days);
+
+        var yearStr = date.getFullYear();
+        var monthStr = ("0" + (date.getMonth() + 1)).slice(-2, 8); // 拼接2位数月份
+        var dayStr = ("0" + date.getDate()).slice(-2, 8); // 拼接2位数日期
+        var result = "";
+        if (!flag) {
+            result = yearStr + "-" + monthStr + "-" + dayStr;
+        } else {
+            result = yearStr + flag + monthStr + flag + dayStr;
+        }
+        return result;
+    };
+
+    //获取当前日期
+    function getCurrentDate() {
+        var date = new Date();
+        var seperator1 = "-";
+        var month = date.getMonth() + 1;
+        var strDate = date.getDate();
+        if (month >= 1 && month <= 9) {
+            month = "0" + month;
+        }
+        if (strDate >= 0 && strDate <= 9) {
+            strDate = "0" + strDate;
+        }
+        var currentdate = date.getFullYear() + seperator1 + month + seperator1 + strDate;
+        return currentdate;
+    };
+</script>
+
+</html>

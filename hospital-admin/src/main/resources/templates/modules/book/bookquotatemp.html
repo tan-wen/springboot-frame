@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>号源配置详情临时表</title>
+		<#include "/header.html">
+</head>
+<body>
+<div id="rrapp" v-cloak>
+    <div v-show="showList">
+        <div class="grid-btn">
+			<#if shiro.hasPermission("base:bookquotatemp:save")>
+            <a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+			</#if>
+			<#if shiro.hasPermission("base:bookquotatemp:update")>
+            <a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+			</#if>
+			<#if shiro.hasPermission("base:bookquotatemp:delete")>
+            <a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+			</#if>
+        </div>
+        <table id="jqGrid"></table>
+        <div id="jqGridPager"></div>
+    </div>
+
+    <div v-show="!showList" class="panel panel-default">
+        <div class="panel-heading">{{title}}</div>
+        <form class="form-horizontal">
+														                    <div class="form-group">
+                        <div class="col-sm-2 control-label">预约项目ID</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookQuotaTemp.bookItemId" placeholder="预约项目ID"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">工作日ID</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookQuotaTemp.weekId" placeholder="工作日ID"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">时间片段ID</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookQuotaTemp.timeSliceId" placeholder="时间片段ID"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">配额类别id</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookQuotaTemp.quotaCategoryId" placeholder="配额类别id"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">最大数</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookQuotaTemp.max" placeholder="最大数"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">完整时间</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookQuotaTemp.fullTime" placeholder="完整时间"/>
+                        </div>
+                    </div>
+							            <div class="form-group">
+                <div class="col-sm-2 control-label"></div>
+                <input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+                &nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="${request.contextPath}/statics/js/modules/book/bookquotatemp.js?_${.now?long}"></script>
+</body>
+</html>

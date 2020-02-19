@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>his侧科室信息</title>
+		<#include "/header.html">
+</head>
+<body>
+<div id="rrapp" v-cloak>
+    <div v-show="showList">
+        <div class="grid-btn">
+            <div class="form-group col-sm-2">
+                <input type="text" class="form-control" v-model="q.name" @keyup.enter="query" placeholder="科室名称">
+            </div>
+            <a class="btn btn-default" @click="query">查询</a>
+        </div>
+        <table id="jqGrid"></table>
+        <div id="jqGridPager"></div>
+    </div>
+
+    <div v-show="!showList" class="panel panel-default">
+        <div class="panel-heading">{{title}}</div>
+        <form class="form-horizontal">
+            <div class="form-group">
+                <div class="col-sm-2 control-label">his侧科室ID</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="baseDep.hisId" placeholder="his侧科室ID"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">科室代码</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="baseDep.code" placeholder="科室代码"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">科室名称</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="baseDep.name" placeholder="科室名称"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">地址</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="baseDep.address" placeholder="地址"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label"></div>
+                <input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+                &nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="${request.contextPath}/statics/js/modules/base/basedep.js?_${.now?long}"></script>
+</body>
+</html>

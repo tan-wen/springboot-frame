@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>医技科室预约</title>
+    <#include "/header.html">
+    <link rel="stylesheet" href="${request.contextPath}/statics/plugins/element-ui/index.css">
+    <style>
+        body {
+            margin: 0;
+        }
+
+        .el-row {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .el-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .g-hd {
+            magin-bottom: 10px;
+            padding: 0 0 10px 0;
+            color: #303133;
+            font-size: 18px;
+            border-bottom: 1px solid #DCDFE6;
+        }
+
+        .box-card > .el-card__header {
+            position: relative;
+            padding: 10px;
+        }
+
+        .box-card > .el-card__header > div {
+            margin-top: 10px;
+        }
+
+        .box-card > .el-card__header .el-button-group .el-button {
+            margin-left: 4px;
+        }
+
+        .u-refresh {
+            float: right;
+        }
+
+        .u-refresh > strong {
+            margin: 0 0 0 10px;
+            color: #ff0000;
+        }
+
+        .el-container {
+            flex-wrap: wrap;
+        }
+
+        .f-df {
+            display: flex;
+        }
+
+        .f-dfc {
+            display: flex;
+            justify-content: center;
+        }
+
+        .f-dfsb {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .f-dfr {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .box-card {
+            margin-bottom: 15px;
+        }
+
+        .box-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .u-box {
+            padding: 10px;
+            border-bottom: 1px solid #EBEEF5;
+        }
+
+        .patientArr {
+            padding: 5px 10px;
+        }
+
+        .u-inf {
+            display: flex;
+            flex: 1;
+        }
+
+        .u-inf > span {
+            display: inline-block;
+            width: 150px;
+            margin: 0 30px 0 20px;
+            padding: 0 5px;
+            color: #909090;
+            border-bottom: 1px solid #606266;
+        }
+
+        .u-inf > input {
+            display: inline-block;
+            width: 120px;
+            color: #909090;
+            background-color: transparent;
+            border-top: 0px;
+            border-left: 0px;
+            border-right: 0px;
+            border-bottom: 1px solid #606266;
+        }
+
+        @media (max-width: 1440px) {
+            .u-inf > span {
+                width: 100px;
+                padding: 0;
+            }
+        }
+
+        .mb10 {
+            margin-bottom: 10px;
+        }
+
+        .ml10 {
+            margin-left: 10px;
+        }
+
+        .btn_group {
+            position: absolute;
+            top: 7px;
+            left: 110px;
+        }
+
+        .date_group {
+            position: absolute;
+            top: 7px;
+            right: 20px;
+            padding-left: 10px;
+            border-left: 1px solid #909399;
+        }
+
+        .week_group {
+            margin-bottom: 10px;
+            padding: 0 50px;
+        }
+
+        .u-icon {
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .weekday {
+            padding: 0 20px;
+            text-align: center;
+            font-size: 12px;
+            border: 1px solid #909399;
+            cursor: pointer;
+        }
+
+        .weekday.active {
+            background: #909399;
+            color: #fff;
+        }
+
+        .wp-list .active {
+            background: #909399;
+            color: #fff;
+        }
+
+        .weekday > p {
+            margin: 5px 0;
+        }
+
+        .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td, .table > thead > tr > th {
+            padding: 4px;
+            line-height: 1.42857143;
+            vertical-align: top;
+            border-top: 1px solid #ddd;
+        }
+
+        .el-radio-group > .el-radio {
+            margin: 6px 0px 6px 0px;
+        }
+
+        .active {
+            background: #2d8cf0;
+        }
+
+        .active a {
+            color: #fff !important;
+        }
+
+        .ul {
+            list-style: none;
+        }
+
+        .ul li {
+            float: left;
+            line-height: 28px;
+            width: 55px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            height: 30px;
+            text-align: center;
+            margin: 5px
+        }
+
+        .ul li.disabled {
+            color: #333
+        }
+
+        .ul li a {
+            color: #333
+        }
+
+
+    </style>
+</head>
+<body>
+<div id="app">
+    <el-container>
+        <el-row :gutter="15" class="f-df">
+            <el-col :span="5">
+                <el-card class="box-card " :body-style="{ padding: '0px' }" style="height:calc(100% - 2px)">
+                    <div slot="header">
+                        <i class="el-icon-menu"></i>
+                        <span>患者来源</span></br>
+                        <el-button-group>
+                            <el-button size="mini" v-for="(item,index) in navList" :key="item.id"
+                                       :class="{active : item.isActive}"
+                                       @click="activeFun(item)">{{item.text}}
+                            </el-button>
+                        </el-button-group>
+                    </div>
+                    <div><br/></div>
+
+
+                    <div slot="header">
+                        <i class="el-icon-menu"></i>
+                        <span>预约患者</span>
+                        <div class="u-refresh">自动刷新<strong>{{btnText}}</strong></div>
+                    </div>
+                    <div class="f-dfc u-box">
+                        <el-date-picker id="startDate" name="startDate"
+                                        size="small"
+                                        v-model="value1" value-format="yyyy-MM-dd"
+                                        type="date"
+                                        placeholder="选择日期" style="width: 100%">
+                        </el-date-picker>
+                    </div>
+                    <div class="u-box f-df">
+                        <el-input
+                                size="small"
+                                placeholder="患者姓名"
+                                prefix-icon="el-icon-search"
+                                v-model="idorname">
+                        </el-input>
+                        <el-button type="primary" size="mini" class="ml10" @click="query">搜索</el-button>
+                        <!-- <el-button type="info" size="mini" @click="refresh">刷新</el-button>-->
+                    </div>
+                    <div class="patientArr">
+                        <el-radio-group style="padding-bottom: 20px" v-model="checkPatient" @change="getPatientDetail">
+                            <el-radio :label="item" :key="item.admNo" v-for="(item,index) in patientPage">
+                                {{item.admNo}} {{item.name}}
+                            </el-radio>
+                        </el-radio-group>
+                        <div style="margin-left: 3px" v-show="totalPages>1">
+                            <ul class="ul" style="padding: 0">
+                                <li class="disabled" v-if="pageIndex == 1">
+                                    <a href="javascript:">上一页</a>
+                                </li>
+
+                                <li v-else @click="LoadData(pageIndex-1)">
+                                    <a href="javascript:">上一页</a>
+                                </li>
+                                <li>{{pageIndex}}/{{totalPages}}页</li>
+                                <!--下一页-->
+                                <li class="disabled" v-if="pageIndex == totalPages ||  totalPages == 0">
+                                    <a href="javascript:">下一页</a>
+                                </li>
+
+                                <li v-else @click="LoadData(pageIndex+1)">
+                                    <a href="javascript:">下一页</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!--<button @click="test">获取选中的值</button>-->
+                </el-card>
+            </el-col>
+
+
+            <el-col :span="20">
+                <el-card class="box-card" :body-style="{ padding: '10px' }">
+                    <div slot="header">
+                        <i class="el-icon-menu"></i>
+                        <span>患者信息</span>
+                    </div>
+                    <div class="f-dfsb mb10">
+                        <div class="u-inf">ID:<span>{{patient.patNo}}</span></div>
+                        <div class="u-inf">姓名:<span>{{patient.name}}</span></div>
+                        <div class="u-inf">性别:<span>{{patient.genderDesc}}</span></div>
+                    </div>
+                    <div class="f-dfsb mb10">
+                        <div class="u-inf">出生日期:<span>{{patient.birth}}</span></div>
+                        <div class="u-inf">年龄:<span>{{patient.age}}</span></div>
+                        <!--<div class="u-inf" contenteditable="true">手机号:<span>{{patient.phone}}</span></div>-->
+                        <div class="u-inf">手机:<input style="margin-left: 20px; width: 100px;" type="text"
+                                                     v-model="patient.phone"/></div>
+                    </div>
+                    <div class="f-dfsb mb10" v-if="selectTreatmentCategory=='INPATIENT'">
+                        <div class="u-inf">所属病区:<span>{{checkPatient.wardDesc}}</span></div>
+                    </div>
+                    <div class="f-dfr">
+                        <el-button v-show="userId" type="danger" size="medium" @click="saveOrUpdateMember">保存
+                        </el-button>
+                    </div>
+                </el-card>
+                <el-card class="box-card" :body-style="{ padding: '10px' }">
+                    <div slot="header">
+                        <i class="el-icon-menu"></i>
+                        <span>检查申请单</span>
+                    </div>
+                    <el-table
+                            :data="patientDetectionApplications"
+                            border
+                            style="width: 100%">
+                        <el-table-column
+                                prop="appNo"
+                                label="检查申请单ID"
+                        >
+                        </el-table-column>
+                        <el-table-column
+                                prop="ordName"
+                                label="检查项目"
+                        >
+                        </el-table-column>
+                        <el-table-column
+                                prop="appDateTf"
+                                label="开单时间"
+                        >
+                        </el-table-column>
+                        <el-table-column
+                                prop="bookItemName"
+                                label="预约项目"
+                        >
+                        </el-table-column>
+
+                        <el-table-column
+                                prop="detectionDepName"
+                                label="医技科室"
+                        >
+                        </el-table-column>
+                        <el-table-column
+                                prop="detectionTime"
+                                label="预约时间"
+                        >
+                        </el-table-column>
+
+                    </el-table>
+                </el-card>
+                <el-card v-show="userId!=''" class="box-card" :body-style="{ padding: '10px' }">
+                    <div slot="header">
+                        <i class="el-icon-menu"></i>
+                        <span>预约日历</span>
+
+                        <!--<el-row >
+                             <el-button size="mini" :value="item.id"  :key="item.id" v-for="(item,index) in detectionDeps"  :class="{active: checkedetectionDepId === item.id}" @click="selectDetectionDep(item.id)">{{item.name}}</el-button>
+                        </el-row>-->
+                        <el-row class="wp-list">
+                            <el-button size="mini" v-for="(item,index) in detectionDeps" :key="item.id"
+                                       :class="{active : checkedetectionDepId == item.id}"
+                                       @click="selectDetectionDep(item.id)">{{item.name}}
+                            </el-button>
+                        </el-row>
+
+                        <div class="date_group">
+                            <el-button size="mini" type="info" plain @click="showDay">日历</el-button>
+                            <el-button size="mini" type="info" plain @click="showMonth">月历</el-button>
+                        </div>
+                    </div>
+                    <div v-show="page=='day'">
+                        <div class="week_group f-dfsb">
+                            <i class="el-icon-arrow-left u-icon" @click="changeWeek(-1)"></i>
+                            <div class="weekday" v-for="(o,index) in dateAndWeek" :key="o.id"
+                                 @click="switchWeek(o.id,o.date)" :class="weekId == o.id ? 'active': ''">
+                                <p>{{o.date|formatSliceDate}}</p>
+                                <p>{{o.weekDay}}</p>
+                            </div>
+                            <i class="el-icon-arrow-right u-icon" @click="changeWeek(1)"></i>
+                        </div>
+
+                        <table class="table table-bordered" v-if="quota.bookItems" style="text-align: center"
+                               v-for="item in quota.bookItems">
+                            <tr>
+                                <td>预约项目</td>
+                                <td>病人来源</td>
+                                <td v-for="slice in item.timeSlices">{{slice.startTime | formatSlice}} - {{slice.endTime
+                                    | formatSlice}}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td :rowspan="item.quotaCategories.length + 2">{{item.bookItemName}}</td>
+                            </tr>
+                            <tr v-for="qc in item.quotaCategories">
+                                <td>{{qc.name}}</td>
+                                <td v-for="slice in item.timeSlices"
+                                    @click="configQuotaOccupied($event, item.bookItemId, slice.timeSliceId,qc.quotaCategoryId)"
+                                    :data-quota-usedNum="item.occupiedMap[weekId + '-' + slice.timeSliceId + '-' + qc.quotaCategoryId]"
+                                    :data-quota-totalNum="item.map[weekId + '-' + slice.timeSliceId + '-' + qc.quotaCategoryId]"
+                                    :data-quota-detail-id="item.idMap[weekId + '-' + slice.timeSliceId + '-' + qc.quotaCategoryId]"
+                                    :data-quota-slice-startTime="slice.startTime">
+                                    {{item.occupiedMap[weekId + '-' + slice.timeSliceId + '-' +
+                                    qc.quotaCategoryId]|numberfomatconvert}}/{{item.map[weekId + '-' + slice.timeSliceId
+                                    + '-' + qc.quotaCategoryId]|numberfomatconvert}}
+                                </td>
+                            </tr>
+
+                        </table>
+
+
+                    </div>
+                    <div v-show="page=='month'">
+                        <el-calendar v-model="value">
+                            <template
+                                    slot="dateCell"
+                                    slot-scope="{data}">
+                                <div style="height:100%;" @click="goDay(data.day)"
+                                     :class="data.isSelected ? 'is-selected' : ''">
+                                    {{ data.day.substring(8)}}
+                                </div>
+                            </template>
+                        </el-calendar>
+                    </div>
+                </el-card>
+                <el-card class="box-card" :body-style="{ padding: '10px' }">
+                    <div slot="header">
+                        <i class="el-icon-menu"></i>
+                        <span>预约记录</span>
+                    </div>
+                    <el-table :data=" bookRecordItemList" border style="width: 100%">
+                        <!-- <el-table-column prop="bookApplicationEntities[0].inLoc" label="预约科室"></el-table-column>-->
+                        <el-table-column prop="bookItemName" label="预约项目"></el-table-column>
+                        <el-table-column prop="bookTime" label="预约时间段"></el-table-column>
+                        <el-table-column prop="treatmentCategory" label="患者来源"></el-table-column>
+                        <el-table-column prop="appDate" label="上报时间"></el-table-column>
+                        <el-table-column prop="bookRecordId" label="注意事项"></el-table-column>
+                        <el-table-column prop="operating" label="操作">
+                            <template slot-scope="scope">
+                                <el-button size="mini" type="info" @click="delBookRecord(scope.row.bookRecordId)">删除
+                                </el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-card>
+            </el-col>
+        </el-row>
+    </el-container>
+
+</div>
+</body>
+<script src="${request.contextPath}/statics/plugins/element-ui/vue.min.js"></script>
+<script src="${request.contextPath}/statics/plugins/element-ui/index.js"></script>
+<script src="${request.contextPath}/statics/libs/validator.js"></script>
+<script>
+    var initDetectionDepId = getURLParameter("detectionDepId");
+    var vm = new Vue({
+        el: '#app',
+        data: function () {
+            return {
+                value1: getCurrentDate(),
+                btnText: '',
+                timer: null, //首先我在data函数里面进行定义定时器名称：
+                timerNum: 61,// 设置定时器时
+                value2: '',
+                checkPatient: {},
+                checkedAdminNo: '',
+                payCategory: '',
+                idorname: '',
+                patientList: [],
+                patient: [],
+                patientDetectionApplications: [],
+                detectionDeps: [],
+                detectionDepId: '',
+                checkedetectionDepId: '',
+                dateAndWeek: [],
+                weekId: '',
+                checkedDate: '',
+                startDateInweek: '',
+                quota: {},
+                occupiedOrDeleteFlag: false,
+                initFlag: '',
+                userId: '',
+                total: '',//总条数
+                pageSize: 20,//一页显示10条
+                totalPages: 1,//总页数
+                pageIndex: 1,//当前页
+                patientPage: [],//分页list
+                /* 时刻表 */
+                weekday: 0,
+                page: "day",
+                value: new Date(),
+                //预约记录
+                bookRecordItemList: [],
+                navList: [
+                    {text: '门诊', isActive: true, treatmentCategory: 'OUTPATIENT'},
+                    {text: '住院', isActive: false, treatmentCategory: 'INPATIENT'},
+                    {text: '外部', isActive: false, treatmentCategory: 'OUTSIDE'}
+                ],
+
+                selectTreatmentCategory: 'OUTPATIENT'
+
+
+            }
+        },
+        created: function () {
+            this.init();
+        },
+        filters: {
+            formatSliceDate: function (str) {
+                return str.substring(0, 10);
+            },
+            formatSlice: function (str) {
+                return str.substring(0, 5);
+            },
+            numberfomatconvert: function (value) {
+                return value ? value : 0;
+            }
+        },
+
+        /** 2020年1月16日开始  ******/
+        methods: {
+            init: function () {
+                var startDate = "";
+                this.checkedDate = this.value1;
+                this.initFlag = true;
+                this.getRecentDateAndWeek(startDate);
+                this.createTimer();
+                this.initGetInfo(startDate, "");
+            },
+
+            activeFun: function (data) {
+                if (data.treatmentCategory == 'OUTSIDE') {
+                    toastr.info("外部病人暂时不可预约！");
+                    return false;
+                }
+                this.navList.forEach(function (obj) {
+                    obj.isActive = false;
+                });
+                data.isActive = !data.isActive;
+                vm.selectTreatmentCategory = data.treatmentCategory;
+                vm.checkPatient={};
+                vm.query();
+
+            },
+
+            getRecentDateAndWeek: function (startDate) {
+                $.ajax({
+                    url: baseURL + "sys/dict/getRecentDateAndWeek",
+                    data: {"startDate": startDate},
+                    type: "post",
+                    dataType: "json",
+                    //async 设置为 false，则所有的请求均为同步请求，在没有返回值之前，同步请求将锁住浏览器，用户其它操作必须等待请求完成才可以执行。
+                    //async:false,
+                    success: function (r) {
+                        if (r.msg == 'success' && r.nextDaysList.length > 0) {
+                            if (vm.initFlag) {
+                                vm.dateAndWeek = r.nextDaysList;
+                                vm.startDateInweek = r.nextDaysList[0].date;
+                                vm.weekId = r.selectDayWeekId;
+                                vm.initFlag = false;
+                            } else {
+                                vm.dateAndWeek = r.nextDaysList;
+                                vm.startDateInweek = r.nextDaysList[0].date;
+                                vm.weekId = r.selectDayWeekId;
+                                vm.checkedDate = r.nextDaysList[0].date;
+                                vm.switchWeek(vm.weekId, vm.checkedDate);
+                            }
+                        } else {
+                            toastr.info("未成功获得预约时间轴！")
+                        }
+                    },
+                    error: function () {
+                        toastr.error("查询时间轴出错,请重试后若不成功请联系管理员！")
+                    }
+                })
+            },
+
+
+            switchWeek: function (id, checkDate) {
+                var checkedDate = checkDate.substring(0, 10);
+                var currentData = getCurrentDate();
+                if (checkedDate < currentData) {
+                    toastr.warning("不可预约今日以前的号源！");
+                    vm.weekId = "";
+                    return false;
+                }
+                if (!vm.checkedetectionDepId) {
+                    toastr.warning("请选择预约项目的执行医技科室！");
+                    return false;
+                }
+                ;
+                if (vm.patientDetectionApplications == undefined || vm.patientDetectionApplications.length <= 0) {
+                    toastr.warning("病人的检查申请单不存在，不可进行预约挂号操作！");
+                    return false;
+                }
+                vm.weekId = id;
+                vm.checkedDate = checkedDate;
+                vm.getDepquota();
+            },
+            changeWeek: function (a) {
+                if (a == 1) {
+                    var resultDate = getDateAfter_n(vm.startDateInweek, 7, '-');
+                } else {
+                    var resultDate = getDateAfter_n(vm.startDateInweek, -7, '-');
+                }
+                vm.getRecentDateAndWeek(resultDate);
+            },
+
+            showDay: function () {
+                this.page = "day";
+            },
+            showMonth: function () {
+                this.page = "month";
+            },
+            saveOrUpdateMember: function (event) {
+                if (vm.userId === "") {
+                    toastr.warning("当前账户不可进行修改操作");
+                    return false;
+                }
+                var isMobilePhone=validator.isMobilePhone(vm.patient.phone,'zh-CN');
+                if(!isMobilePhone){
+                    toastr.error("手机号码非法");
+                    return false;
+                }
+                var url = vm.patient.id == null ? "base/basemember/save" : "base/basemember/update";
+                $.ajax({
+                    type: "POST",
+                    url: baseURL + url,
+                    contentType: "application/json",
+                    data: JSON.stringify(vm.patient),
+                    success: function (r) {
+                        if (r.code === 0) {
+                            toastr.info('修改用户信息后保存成功！');
+
+                        } else {
+                            toastr.info('修改用户信息后保存' + r.msg);
+                        }
+                    }
+                });
+            },
+
+
+            initGetInfo: function (startDate, keywords) {
+                $.ajax({
+                    url: baseURL + "book/medicalDetection/list",
+                    data: {
+                        "startDate": startDate,
+                        "keywords": keywords,
+                        "treatmentCategory": "OUTPATIENT",
+                        "detectionDeptId": initDetectionDepId
+                    },
+                    type: "post",
+                    dataType: "json",
+                    async: true,
+                    success: function (r) {
+
+                        if (r.msg == 'success' && r.patientList.length > 0) {
+                            vm.patientList = r.patientList;
+                            vm.userId = r.userId;
+                            //调用获取病人详的方法
+                            /*vm.checkPatient = r.patientList[0];
+                            vm.checkedAdminNo = r.patientList[0].admNo;
+                            vm.payCategory = r.patientList[0].payCategory;*/
+                            vm.total = r.patientList.length;//获取数据总条数
+                            vm.totalPages = Math.ceil(vm.total * 1 / vm.pageSize);
+                            vm.LoadData(1);//加载第一页数据
+                            /*vm.getPatientDetail();*/
+                        } else {
+                            vm.patientList = [];
+                            toastr.info("[选中日期无患者预约]")
+                        }
+                    },
+                    error: function () {
+                        toastr.error("查询出错,请重试后若不成功请联系管理员！")
+                    }
+                })
+
+            },
+
+
+            query: function () {
+                var startDate = this.value1;
+                if (!startDate) {
+                    toastr.warning('查询日期未选择！');
+                    return;
+                }
+                var patName = this.idorname;
+                if (!patName) {
+                    patName = "";
+                }
+                vm.getInfo(startDate, patName);
+                this.idorname = "";
+                this.clearTimer();
+                this.timerNum = 61;
+                this.createTimer();
+            },
+
+
+            getInfo: function (startDate, keywords) {
+                $.ajax({
+                    url: baseURL + "book/medicalDetection/list",
+                    data: {
+                        "startDate": startDate,
+                        "keywords": keywords,
+                        "treatmentCategory": vm.selectTreatmentCategory,
+                        "detectionDeptId": initDetectionDepId
+                    },
+                    type: "post",
+                    dataType: "json",
+                    async: false,
+                    success: function (r) {
+                        if (r.msg == 'success' && r.patientList.length > 0) {
+                            vm.patientList = r.patientList;
+                            vm.userId = r.userId;
+                            //调用获取病人详的方法
+                            /*vm.checkPatient = r.patientList[0];
+                            vm.checkedAdminNo = r.patientList[0].admNo;
+                            vm.payCategory = r.patientList[0].payCategory;*/
+                            vm.total = r.patientList.length;
+                            vm.totalPages = Math.ceil(vm.total * 1 / vm.pageSize);
+                            vm.LoadData(1);//加载第一页数据
+                            /*vm.getPatientDetail();*/
+                        } else {
+                            vm.patientList = [];
+                            vm.patient = [];
+                            vm.checkPatient = {};
+                            vm.patientDetectionApplications = [];
+                            vm.bookRecordItemList = [];
+                            vm.occupiedOrDeleteFlag = false;
+                            vm.quota = {};
+                            vm.detectionDeps = [];
+                            toastr.info("[选中日期无患者预约]")
+                        }
+                    },
+                    error: function () {
+                        vm.patientList = [];
+                        vm.patient = [];
+                        vm.checkPatient = {};
+                        vm.patientDetectionApplications = [];
+                        vm.bookRecordItemList = [];
+                        vm.occupiedOrDeleteFlag = false;
+                        vm.quota = {};
+                        vm.detectionDeps = [];
+                        toastr.error("查询出错,请重试后若不成功请联系管理员！")
+                    }
+                })
+
+            },
+
+
+            refresh: function () {
+                //var startDate = vm.$data.value1;
+                var startDate = this.value1;
+                if (!startDate) {
+                    toastr.warning('查询日期未选择！');
+                    return;
+                }
+                vm.getInfo(startDate, "");
+                this.idorname = "";
+                this.clearTimer();
+                this.timerNum = 61;
+                this.createTimer();
+            },
+
+
+            /** 2020年1月16日结束  ******/
+
+
+
+
+            selectDetectionDep: function (checkedetectionDepId) {
+                vm.checkedetectionDepId = checkedetectionDepId;
+                if (!checkedetectionDepId) {
+                    toastr.warning('未成功选择检查项目的执行科室！');
+                    return;
+                }
+                ;
+
+                if (vm.patientDetectionApplications == undefined || vm.patientDetectionApplications.length <= 0) {
+                    toastr.warning("病人的检查申请单不存在，不可进行预约挂号操作！");
+                    return false;
+                }
+                ;
+                if (!vm.weekId) {
+                    toastr.warning("请选择想预约的日期！");
+                    return false;
+                }
+                ;
+                vm.getDepquota();
+            },
+
+
+            //获取病患详情信息
+            getPatientDetail: function () {
+                var startDate = this.value1;
+                if (!startDate) {
+                    toastr.warning('查询日期未选择！');
+                    return;
+                }
+                var admNo = vm.checkPatient.admNo;
+                vm.checkedAdminNo = vm.checkPatient.admNo;
+                vm.payCategory = vm.checkPatient.payCategory;
+                if (!admNo) {
+                    toastr.warning('请选择需查看详情的病患！');
+                    return;
+                }
+
+                var url = "book/patient/detail";
+                $.ajax({
+                    url: baseURL + url,
+                    data: {"startDate": startDate, "admNo": admNo},
+                    type: "post",
+                    dataType: "json",
+                    async: false,
+                    success: function (r) {
+                        if (r.msg == 'success' && r.patientDetail && r.patientDetail.treatment && r.patientDetail.bookApps) {
+                            vm.patient = r.patientDetail.treatment;
+                            vm.patientDetectionApplications = r.patientDetail.bookApps;
+                            //清除患者清单中radio的选中状态
+                            //$("input[name='patient']").removeAttr("checked");
+                            //获取预约记录
+                            vm.getBookRecord();
+                            if (!vm.occupiedOrDeleteFlag) {
+                                vm.checkedetectionDepId = "";
+                                vm.quota = {};
+                                vm.detectionDeps = [];
+                                if (r.detectionDeps && r.detectionDeps.length > 0) {
+                                    vm.detectionDeps = r.detectionDeps;
+                                    vm.checkedetectionDepId = r.detectionDeps[0].id;
+                                    vm.getDepquota();
+                                }
+                            }
+                            vm.occupiedOrDeleteFlag = false;
+
+                        } else {
+                            vm.patient = [];
+                            vm.checkPatient = {};
+                            vm.detectionDeps = [];
+                            vm.patientDetectionApplications = [];
+                            vm.bookRecordItemList = [];
+                            toastr.info("未查询到该就诊号对应的待预约病人医嘱信息！");
+                            vm.occupiedOrDeleteFlag = false;
+                        }
+                    },
+                    error: function () {
+                        vm.patient = [];
+                        vm.checkPatient = {};
+                        vm.detectionDeps = [];
+                        vm.patientDetectionApplications = [];
+                        vm.bookRecordItemList = [];
+                        toastr.info("查询该就诊号对应的待预约病人医嘱出错，请重试或联系管理员！");
+                        vm.occupiedOrDeleteFlag = false;
+                    }
+                })
+
+            },
+            getDepquota: function () {
+                var checkedetectionDepId = vm.checkedetectionDepId;
+                var weekId = vm.weekId;
+                var checkedDate = vm.checkedDate;
+                var patientDetectionApplications = vm.patientDetectionApplications;
+                var ordIdstr = '';
+                for (var i = 0, len = patientDetectionApplications.length; i < len; i++) {
+
+                    if (ordIdstr == '') ordIdstr += patientDetectionApplications[i].ordId;
+                    else ordIdstr += ',' + patientDetectionApplications[i].ordId;
+
+                }
+
+                //var ordIds = ["15315||1"];
+                var url = vm.selectTreatmentCategory == 'OUTPATIENT' ? "book/outpatient/quota" : "book/inpatient/quota";
+                $.ajax({
+                    url: baseURL + url,
+                    data: {
+                        "checkedDate": checkedDate,
+                        "weekId": weekId,
+                        "detectionId": checkedetectionDepId,
+                        "ordIds": ordIdstr
+                    },
+                    type: "post",
+                    dataType: "json",
+                    async: false,
+                    success: function (r) {
+                        if (r.code == 0) {
+                            vm.quota = r.quota;
+                        } else {
+                            toastr.warning("获取号源信息出错:" + r.tipMap.msg);
+                        }
+                    },
+                    error: function () {
+                        vm.quota = {};
+                        toastr.info("获取医技科室的预约情况出错！")
+                    }
+                })
+            },
+
+
+            configQuotaOccupied: function (event, bookItemId, timeSliceId, quotaCategoryId) {
+                var useNum = event.target.getAttribute('data-quota-usedNum');
+                var totalNum = event.target.getAttribute('data-quota-totalNum');
+                var quotaDetailId = event.target.getAttribute('data-quota-detail-id');
+                var quotaSliceStartTime = event.target.getAttribute('data-quota-slice-startTime');
+                var currentDate = vm.checkedDate;
+                var currentTimeSliceDate =getCurrentTime().substr(0,10);
+                var currentTimeSliceTime =getCurrentTime().substr(11,5);
+                if((currentDate==currentTimeSliceDate) && quotaSliceStartTime<=currentTimeSliceTime){
+                    toastr.warning("不可预约过时号源！");
+                    return false;
+                }
+                if (!totalNum) {
+                    toastr.warning("未分配号源！");
+                    return false;
+                }
+                if (useNum >= totalNum) {
+                    toastr.warning("号源已满,请另选择时间段预约！");
+                    return false;
+                }
+                var checkedDate = vm.checkedDate;
+                var currentData = getCurrentDate();
+                if (checkedDate < currentData) {
+                    toastr.warning("不可预约今日以前的号源！");
+                    return false;
+                }
+                if (vm.patientDetectionApplications == undefined || vm.patientDetectionApplications.length <= 0) {
+                    toastr.warning("病人的检查申请单不存在，不可进行预约挂号操作！");
+                    return false;
+                }
+                if (vm.userId === "") {
+                    toastr.warning("当前账户不可进行修改操作");
+                    return false;
+                }
+                var url = vm.selectTreatmentCategory == 'OUTPATIENT' ? "book/outpatient/quotaoccupied" : "book/inpatient/quotaoccupied";
+                $.ajax({
+                    type: "POST",
+                    url: baseURL + url,
+                    data: {
+                        "startDate": vm.value1,
+                        "admNo": vm.checkedAdminNo,
+                        "bookItemId": bookItemId,
+                        "bookTime": vm.checkedDate,
+                        "weekId": vm.weekId,
+                        "detectionId": vm.checkedetectionDepId,
+                        "timeSliceId": timeSliceId,
+                        "payCategory": vm.payCategory,
+                        "wardId": vm.checkPatient.wardId,
+                        "depId": vm.checkPatient.ctLocId,
+                        "quotaDetailId": quotaDetailId
+                    },
+                    dataType: "json",
+                    async: false,
+                    success: function (r) {
+                        if (r.code == 0) {
+                            vm.bookRecordItemList = r.bookRecordItemList;
+                            //调用获取最新预约情况方法
+                            vm.getDepquota();
+                            vm.occupiedOrDeleteFlag = true;
+                            //调用获取检查申请单(刷新)
+                            vm.getPatientDetail();
+                        } else {
+                            toastr.warning("住院医生站预约出错" + r.tipMap.msg);
+                        }
+
+                    }
+                });
+
+            },
+
+            delBookRecord: function (recordId) {
+                if (!recordId) {
+                    toastr.warning("要删除的记录不存在,请刷新后重试！");
+                    return false;
+                }
+                if (vm.userId === "") {
+                    toastr.warning("当前账户不可进行删除操作");
+                    return false;
+                }
+
+                $.get(baseURL + "/book/bookrecord/deleteById/" + recordId, function (r) {
+                    toastr.info("删除成功！");
+                    vm.getBookRecord();
+                    vm.getDepquota();
+                    //调用获取检查申请单(刷新)
+                    vm.occupiedOrDeleteFlag = true;
+                    vm.getPatientDetail();
+                });
+            },
+
+            getBookRecord: function () {
+                var admNo = vm.checkedAdminNo;
+                $.get(baseURL + "/book/bookrecord/getBookRecord/" + admNo, function (r) {
+                    vm.bookRecordItemList = r.bookRecordItemList;
+                });
+            },
+            goDay: function (obj) {
+                this.getRecentDateAndWeek(obj);
+                this.page = "day";
+            },
+            createTimer() {
+                this.timer = setInterval(() => {  //创建定时器
+                    if (this.timerNum === 0) { // 设置的定时器时间为0后执行的操作
+                        this.clearTimer(); // 关闭定时
+                        this.onerefresh();
+                        this.timerNum = 61;
+                        this.createTimer();
+                    } else {
+                        this.loading();
+                    }
+                }, 1000);
+            },
+            loading() { // 启动定时器
+                this.timerNum -= 1; // 定时器减1
+                this.btnText = this.timerNum;
+            },
+            clearTimer() {//清除定时器
+                clearInterval(this.timer);
+                this.timer = null;
+            },
+
+            onerefresh() {
+
+                setTimeout(() => {
+                    vm.refresh();
+                }, 100);
+
+            },
+            //前端加分页调用的方法
+            LoadData(value) {
+                vm.pageIndex = value;
+                vm.patientPage = vm.patientList.slice((vm.pageIndex - 1) * 20, vm.pageIndex * 20);
+                vm.checkPatient = vm.patientPage[0];
+                vm.checkedAdminNo = vm.patientPage[0].admNo;
+                vm.payCategory = vm.patientPage[0].payCategory;
+                vm.getPatientDetail();
+            }
+        },
+    });
+
+    //获取当前日期
+    function getCurrentDate() {
+        var date = new Date();
+        var seperator1 = "-";
+        var month = date.getMonth() + 1;
+        var strDate = date.getDate();
+        if (month >= 1 && month <= 9) {
+            month = "0" + month;
+        }
+        if (strDate >= 0 && strDate <= 9) {
+            strDate = "0" + strDate;
+        }
+        var currentdate = date.getFullYear() + seperator1 + month + seperator1 + strDate;
+        return currentdate;
+    };
+
+    //获取n天后的日期
+    function getDateAfter_n(initDate, days, flag) {
+        if (!days) {
+            return initDate;
+        }
+        initDate = initDate.replace(/-/g, '');
+        flag = $.trim(flag);
+        var date;
+        // 是否设置了起始日期
+        if (!$.trim(initDate)) { // 没有设置初始化日期，就默认为当前日期
+            date = new Date();
+        } else {
+            var year = initDate.substring(0, 4);
+            var month = initDate.substring(4, 6);
+            var day = initDate.substring(6, 8);
+            date = new Date(year, month - 1, day); // 月份是从0开始的
+        }
+        date.setDate(date.getDate() + days);
+
+        var yearStr = date.getFullYear();
+        var monthStr = ("0" + (date.getMonth() + 1)).slice(-2, 8); // 拼接2位数月份
+        var dayStr = ("0" + date.getDate()).slice(-2, 8);
+        var result = "";
+        if (!flag) {
+            result = yearStr + "-" + monthStr + "-" + dayStr;
+        } else {
+            result = yearStr + flag + monthStr + flag + dayStr;
+        }
+        return result;
+    };
+
+
+    function getCurrentTime(){
+        return new Date().toLocaleString('chinese', { year: 'numeric', month: '2-digit',
+            day: '2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).replace(/\//g, '-');
+    }
+
+
+
+</script>
+</html>

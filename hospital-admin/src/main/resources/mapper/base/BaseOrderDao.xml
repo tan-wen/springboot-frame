@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aoyang.modules.base.dao.BaseOrderDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.aoyang.modules.base.entity.BaseOrderEntity" id="baseOrderMap">
+        <result property="id" column="id"/>
+        <result property="bookItemId" column="book_item_id"/>
+        <result property="hisId" column="his_id"/>
+        <result property="name" column="name"/>
+        <result property="arcicRowId" column="arcic_row_id"/>
+        <result property="arcicName" column="arcic_name"/>
+        <result property="orcatRowId" column="orcat_row_id"/>
+        <result property="orcatName" column="orcat_name"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="lastModifyBy" column="last_modify_by"/>
+        <result property="lastModifyTime" column="last_modify_time"/>
+        <result property="deleted" column="deleted"/>
+        <association property="bookItemEntity" javaType="com.aoyang.modules.book.entity.BookItemEntity">
+            <id property="id" column="b_id"/>
+            <result property="name" column="b_name"/>
+            <result property="detectionDepId" column="b_detectionDepId"/>
+            <association property="baseDetectionDepEntity" javaType="com.aoyang.modules.base.entity.BaseDetectionDepEntity">
+                <id property="id" column="det_id"/>
+                <result property="name" column="det_name"/>
+            </association>
+        </association>
+    </resultMap>
+
+    <select id="listPage" resultMap="baseOrderMap">
+        select
+        a.id
+        ,a.book_item_id
+        ,a.his_id
+        ,a.name
+        ,a.arcic_row_id
+        ,a.arcic_name
+        ,a.orcat_row_id
+        ,a.orcat_name
+        ,a.create_time
+        ,a.last_modify_by
+        ,a.last_modify_time
+        ,a.deleted
+        ,b.id b_id
+        ,b.name b_name
+        from
+        base_order a
+        left join
+        book_item b on a.book_item_id = b.id and b.deleted = 0
+        where
+        a.deleted = 0
+        <if test="_parameter!= null and _parameter != ''">
+            and
+            a.name like CONCAT(CONCAT('%',#{keyword}),'%')
+            or
+            a.arcic_name like CONCAT(CONCAT('%',#{keyword}),'%')
+            or
+            a.his_id like CONCAT(CONCAT('%',#{keyword}),'%')
+        </if>
+    </select>
+
+    <select id="getDetectionItemDep" resultMap="baseOrderMap">
+        select
+        distinct C.name det_name
+        ,C.id det_id
+        ,B.name b_name
+        from
+        base_order A
+        left join
+        book_item B on A.book_item_id = B.id and B.deleted = 0
+        left join
+        base_detection_dep C  on B.detection_dep_id = C.id and C.deleted = 0
+        where
+        A.deleted = 0
+        and C.name is not null
+        and C.id is not null
+        <if test="hisId != null and hisId != ''">
+            and A.his_id = #{hisId}
+        </if>
+    </select>
+    <select id="getBookItemIdByHisId" resultType="java.lang.Long">
+        select
+            book_item_id
+        from
+            base_order
+        where
+            his_id = #{hisOrderId}
+    </select>
+    <select id="getHisOrdId" resultType="java.lang.String">
+        select
+            bo.his_id
+        from base_order bo inner join book_item bi
+        on bo.book_item_id = bi.id
+        where
+            bi.detection_dep_id = #{detectionDepId}
+
+    </select>
+
+
+</mapper>

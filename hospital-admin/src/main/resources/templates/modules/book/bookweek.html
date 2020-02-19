@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+		<#include "/header.html">
+    <style type="text/css">
+
+        .time-slice-table tr td{width: 20%;}
+        .time-slice-table tr td:first-child{width: 60%;}
+    </style>
+</head>
+<body>
+<div id="rrapp" v-cloak>
+    <div v-show="showList">
+        <div class="grid-btn">
+            <div class="grid-btn">
+                <div class="form-group col-sm-2">
+                    <input type="text" class="form-control" v-model="q.name" @keyup.enter="query" placeholder="名称">
+                </div>
+                <a class="btn btn-default" @click="query">查询</a>
+			<#if shiro.hasPermission("book:bookweek:save")>
+            <a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+			</#if>
+			<#if shiro.hasPermission("book:bookweek:update")>
+            <a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+			</#if>
+			<#if shiro.hasPermission("book:bookweek:delete")>
+            <a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+			</#if>
+        </div>
+        <table id="jqGrid"></table>
+        <div id="jqGridPager"></div>
+    </div>
+
+    <div v-show="!showList" class="panel panel-default">
+        <div class="panel-heading">{{title}}</div>
+        <form class="form-horizontal">
+            <div class="form-group">
+                <div class="col-sm-2 control-label">名称</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="bookWeek.name" placeholder="名称"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">星期</div>
+                <div class="col-sm-10">
+                    <select class="form-control" v-model="bookWeek.week">
+                        <option v-for="w in weeks" :value="w.id">{{w.value}}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">设置时间片段</div>
+                <div class="col-sm-10">
+                    <table class="table table-hover table-bordered table-striped time-slice-table">
+                        <thead class="text-center">
+                            <tr>
+                                <td>时间片段</td>
+                                <td>排序</td>
+                                <td>操作</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(tr,idx) in trs">
+                                <td >
+                                    <input type="hidden" v-model="tr.id">
+                                    <select class="form-control" v-model="tr.timeSliceId">
+                                        <option v-for="as in allSlices" :value="as.id">{{as.name}}</option>
+                                    </select>
+                                </td>
+                                <td><input type="number" class="form-control" :value="idx+1" v-model="tr.position"></td>
+                                <td><button type="button" class="form-control btn btn-danger" @click="removeSlice(idx,tr.id)">移除</button></td>
+                            </tr>
+                            <tr>
+                                <td colspan="3">
+                                    <button class="form-control btn btn-info" type="button" @click="insertSlice">插入时间片段</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label"></div>
+                <input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+                &nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="${request.contextPath}/statics/js/modules/book/bookweek.js?_${.now?long}"></script>
+</body>
+</html>

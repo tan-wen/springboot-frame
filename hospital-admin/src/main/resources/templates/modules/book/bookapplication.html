@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>预约申请单表</title>
+		<#include "/header.html">
+</head>
+<body>
+<div id="rrapp" v-cloak>
+    <div v-show="showList">
+        <div class="grid-btn">
+			<#if shiro.hasPermission("base:bookapplication:save")>
+            <a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+			</#if>
+			<#if shiro.hasPermission("base:bookapplication:update")>
+            <a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+			</#if>
+			<#if shiro.hasPermission("base:bookapplication:delete")>
+            <a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+			</#if>
+        </div>
+        <table id="jqGrid"></table>
+        <div id="jqGridPager"></div>
+    </div>
+
+    <div v-show="!showList" class="panel panel-default">
+        <div class="panel-heading">{{title}}</div>
+        <form class="form-horizontal">
+														                    <div class="form-group">
+                        <div class="col-sm-2 control-label">就诊id</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.treatmentId" placeholder="就诊id"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">预约记录id</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.bookRecordId" placeholder="预约记录id"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">缴费状态</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.payStatus" placeholder="缴费状态"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">执行状态</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.exeStatus" placeholder="执行状态"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">病历号</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.medicareno" placeholder="病历号"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">卡号</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.cardNo" placeholder="卡号"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">医保号</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.insuranceNo" placeholder="医保号"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">科室名</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.ward" placeholder="科室名"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">就诊号</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.regNo" placeholder="就诊号"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">患者姓名</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.name" placeholder="患者姓名"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">患者性别</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.sex" placeholder="患者性别"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">床号</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.bedNo" placeholder="床号"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">患者出生日期</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.dob" placeholder="患者出生日期"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">患者年龄</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.age" placeholder="患者年龄"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">转入科室</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.inLoc" placeholder="转入科室"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">开单医生</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.appDoc" placeholder="开单医生"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">接收科室</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.recLoc" placeholder="接收科室"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">申请日期</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.appDate" placeholder="申请日期"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">病人表RowId</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.inPatientNo" placeholder="病人表RowId"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">电话</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.telNo" placeholder="电话"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">住址</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.address" placeholder="住址"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">医嘱项目ID</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.ordId" placeholder="医嘱项目ID"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">检查项目名</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.ordName" placeholder="检查项目名"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">检查费用</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.price" placeholder="检查费用"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">有无模板</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.perTempl" placeholder="有无模板"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">医嘱ID</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.oeOrditemId" placeholder="医嘱ID"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">是否紧急</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.ungent" placeholder="是否紧急"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">现状</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.patientNow" placeholder="现状"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">主诊断</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.mainDiagose" placeholder="主诊断"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">执行项目</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.purpose" placeholder="执行项目"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">内容一</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.content1" placeholder="内容一"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">内容二</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.content2" placeholder="内容二"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">内容三</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.content3" placeholder="内容三"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">内容四</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.content4" placeholder="内容四"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">内容五</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.content5" placeholder="内容五"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">内容六</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.content6" placeholder="内容六"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">内容七</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.content7" placeholder="内容七"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">预约日期</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.hopeDate" placeholder="预约日期"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">创建人</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.createBy" placeholder="创建人"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">创建时间</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.createTime" placeholder="创建时间"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">最后修改人</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.lastModifyBy" placeholder="最后修改人"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">最后修改时间</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.lastModifyTime" placeholder="最后修改时间"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">已删除</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="bookApplication.deleted" placeholder="已删除"/>
+                        </div>
+                    </div>
+							            <div class="form-group">
+                <div class="col-sm-2 control-label"></div>
+                <input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+                &nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="${request.contextPath}/statics/js/modules/book/bookapplication.js?_${.now?long}"></script>
+</body>
+</html>

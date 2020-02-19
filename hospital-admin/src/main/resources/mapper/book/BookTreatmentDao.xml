@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aoyang.modules.book.dao.BookTreatmentDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.aoyang.modules.book.entity.BookTreatmentEntity" id="bookTreatmentMap">
+        <result property="id" column="id"/>
+        <result property="admNo" column="adm_no"/>
+        <result property="memberId" column="member_id"/>
+        <result property="treatmentCategory" column="treatment_category"/>
+        <result property="payCategory" column="pay_category"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="lastModifyBy" column="last_modify_by"/>
+        <result property="lastModifyTime" column="last_modify_time"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+
+    <resultMap type="com.aoyang.modules.book.dto.BookRecordDetail" id="bookRecordDetailMap">
+        <id property="id" column="treatment_id" />
+        <result property="treatmentCategory" column="treatment_category"/>
+        <collection property="bookApps" ofType="com.aoyang.modules.book.dto.BookApp">
+            <result property="inLoc" column="app_in_loc"/>
+            <result property="appDate" column="app_date"/>
+            <result property="bookItemName" column="book_item_name"/>
+            <result property="startTime" column="start_time"/>
+            <result property="endTime" column="end_time"/>
+            <association property="bookRecord" javaType="com.aoyang.modules.book.dto.BookRecord">
+                <id property="id" column="record_id" />
+                <result property="bookTime" column="book_time"/>
+            </association>
+        </collection>
+    </resultMap>
+
+
+    <select id="getBookRecordByAdmNo" resultMap="bookRecordDetailMap">
+        SELECT
+            A.treatment_category treatment_category,
+            A.id as treatment_id,
+            B.in_loc app_in_loc ,
+            B.app_date app_date ,
+            C.id record_id,
+            C.book_time book_time,
+            E.start_time  start_time,
+            E.end_time end_time,
+            D.name  book_item_name
+        FROM
+            book_treatment A
+        LEFT JOIN
+             book_application B on A.id = B.treatment_id and B.deleted = 0
+        LEFT JOIN
+             book_record C on  C.id = B.book_record_id and C.deleted = 0
+        LEFT JOIN
+             book_item D on C.book_item_id = D.id and D.deleted= 0
+        LEFT JOIN
+             book_time_slice E on C.time_slice_id = E.id and E.deleted= 0
+        WHERE A.adm_no = #{admNo}
+            AND A.deleted = 0
+    </select>
+
+</mapper>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aoyang.modules.book.dao.BookWeekDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.aoyang.modules.book.entity.BookWeekEntity" id="bookWeekMap">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="week" column="week"/>
+        <result property="weekDesc" column="week_desc"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="lastModifyBy" column="last_modify_by"/>
+        <result property="lastModifyTime" column="last_modify_time"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+
+    <select id="listPage" resultMap="bookWeekMap">
+        select
+        a.*
+        ,b.value as week_desc
+        from book_week a
+        left join sys_dict b on a.week = b.id
+        where deleted = 0
+        <if test="_parameter != null">
+            <bind name="pattern" value="'%' + _parameter + '%'"/>
+            and a.name like #{pattern}
+        </if>
+    </select>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+        insert into book_week
+            (name, week, create_by,create_time,last_modify_by,last_modify_time,deleted)
+        values
+            (#{name}, #{week}, #{createBy}, #{createTime}, #{lastModifyBy}, #{lastModifyTime}, #{deleted})
+    </insert>
+
+    <select id="queryAll" resultMap="bookWeekMap">
+        select * from book_week where deleted = 0
+    </select>
+</mapper>

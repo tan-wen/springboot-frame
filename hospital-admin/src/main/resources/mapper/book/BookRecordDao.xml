@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aoyang.modules.book.dao.BookRecordDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.aoyang.modules.book.entity.BookRecordEntity" id="bookRecordMap">
+        <result property="id" column="id"/>
+        <result property="bookItemId" column="book_item_id"/>
+        <result property="bookTime" column="book_time"/>
+        <result property="weekId" column="week_id"/>
+        <result property="timeSliceId" column="time_slice_id"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="lastModifyBy" column="last_modify_by"/>
+        <result property="lastModifyTime" column="last_modify_time"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+
+
+
+    <resultMap type="com.aoyang.modules.book.entity.BookRecordEntity" id="bookRecordEntityMap">
+        <id property="id" column="id" />
+        <result property="bookTime" column="book_time"/>
+        <association property="bookTimeSliceEntity" javaType="com.aoyang.modules.book.entity.BookTimeSliceEntity">
+            <id property="id" column="ts_id" />
+            <result property="startTime" column="start_time"/>
+            <result property="endTime" column="end_time"/>
+        </association>
+
+    </resultMap>
+
+
+    <select id="getBookItemById" resultType="com.aoyang.modules.book.entity.BookItemEntity">
+        SELECT
+            a.id,
+            a.name,
+            a.code,
+            a.remark,
+            a.detection_dep_id,
+            a.create_by,
+            a.create_time,
+            a.last_modify_by,
+            a.last_modify_time,
+            a.deleted
+        FROM
+            book_record b
+        INNER JOIN book_item a ON b.book_item_id = a.id
+        WHERE b.id = #{recordId}
+            AND a.deleted = 0
+    </select>
+
+
+    <select id="getRecordTimeById" resultMap="bookRecordEntityMap">
+        select
+        A.book_time book_time,
+        C.start_time  start_time,
+        C.end_time end_time from
+        book_record A
+        LEFT JOIN
+        book_time_slice C
+        on A.time_slice_id = C.id and C.deleted= 0
+        where  A.deleted = 0
+        and A.id = #{recordId}
+    </select>
+
+
+</mapper>

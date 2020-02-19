@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aoyang.modules.book.dao.BookQuotaCategoryDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.aoyang.modules.book.entity.BookQuotaCategoryEntity" id="bookQuotaCategoryMap">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="detectionDepId" column="detection_dep_id"/>
+        <result property="position" column="position"/>
+        <result property="auto" column="auto"/>
+        <result property="category" column="category"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="lastModifyBy" column="last_modify_by"/>
+        <result property="lastModifyTime" column="last_modify_time"/>
+        <result property="deleted" column="deleted"/>
+        <association property="detectionDepEntity" javaType="com.aoyang.modules.base.entity.BaseDetectionDepEntity">
+            <id property="id" column="b_id"/>
+            <result property="name" column="b_name"/>
+        </association>
+    </resultMap>
+
+    <select id="listPage" resultMap="bookQuotaCategoryMap">
+        select
+            a.id
+            ,a.name
+            ,a.detection_dep_id
+            ,a.position
+            ,a.auto
+            ,a.category
+            ,b.name b_name
+        from
+            book_quota_category a
+        left join
+            base_detection_dep b on a.detection_dep_id = b.id and b.deleted = 0
+        where
+            a.deleted = 0
+        <if test="_parameter!= null and _parameter != ''">
+        and
+             a.name like CONCAT(CONCAT('%',#{name}),'%')
+          </if>
+    </select>
+
+</mapper>

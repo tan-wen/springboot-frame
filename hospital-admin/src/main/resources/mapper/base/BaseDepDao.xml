@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aoyang.modules.base.dao.BaseDepDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.aoyang.modules.base.entity.BaseDepEntity" id="baseDepMap">
+        <result property="id" column="id"/>
+        <result property="hisId" column="his_id"/>
+        <result property="code" column="code"/>
+        <result property="name" column="name"/>
+        <result property="address" column="address"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="lastModifyBy" column="last_modify_by"/>
+        <result property="lastModifyTime" column="last_modify_time"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+
+    <select id="getHisId" resultMap="baseDepMap">
+        select * from
+        base_dep a
+        where
+        his_id=#{hisId}
+    </select>
+
+
+</mapper>

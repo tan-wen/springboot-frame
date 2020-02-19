@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>病区</title>
+		<#include "/header.html">
+</head>
+<body>
+<div id="rrapp" v-cloak>
+    <div v-show="showList">
+        <div class="grid-btn">
+            <div class="form-group col-sm-2">
+                <input type="text" class="form-control" v-model="q.keyword" @keyup.enter="query" placeholder="科室名称">
+            </div>
+            <a class="btn btn-default" @click="query">查询</a>
+        </div>
+        <table id="jqGrid"></table>
+        <div id="jqGridPager"></div>
+    </div>
+
+    <div v-show="!showList" class="panel panel-default">
+        <div class="panel-heading">{{title}}</div>
+        <form class="form-horizontal">
+														                    <div class="form-group">
+                        <div class="col-sm-2 control-label">his侧病区ID</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="baseInpatientArea.hisId" placeholder="his侧病区ID"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">病区名字</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="baseInpatientArea.name" placeholder="病区名字"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">病区描述</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="baseInpatientArea.description" placeholder="病区描述"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">创建人</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="baseInpatientArea.createBy" placeholder="创建人"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">创建时间</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="baseInpatientArea.createTime" placeholder="创建时间"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">最后修改人</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="baseInpatientArea.lastModifyBy" placeholder="最后修改人"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">最后修改时间</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="baseInpatientArea.lastModifyTime" placeholder="最后修改时间"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">已删除</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="baseInpatientArea.deleted" placeholder="已删除"/>
+                        </div>
+                    </div>
+							            <div class="form-group">
+                <div class="col-sm-2 control-label"></div>
+                <input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+                &nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="${request.contextPath}/statics/js/modules/base/baseinpatientarea.js?_${.now?long}"></script>
+</body>
+</html>

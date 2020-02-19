@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aoyang.modules.base.dao.BaseMemberDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.aoyang.modules.base.entity.BaseMemberEntity" id="baseMemberMap">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="patNo" column="pat_no"/>
+        <result property="gender" column="gender"/>
+        <result property="genderDesc" column="gender_desc"/>
+        <result property="birthday" column="birthday"/>
+        <result property="birth" column="birthday"/>
+        <result property="age" column="age"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="lastModifyBy" column="last_modify_by"/>
+        <result property="lastModifyTime" column="last_modify_time"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+
+    <select id="listPage" resultMap="baseMemberMap">
+        select
+              a.*
+             ,b.value as gender_desc
+        from base_member a
+        left join sys_dict b on a.gender = b.id
+        where deleted = 0
+        <if test="_parameter != null">
+            <bind name="pattern" value="'%' + _parameter + '%'"/>
+            and a.name like #{pattern}
+        </if>
+    </select>
+
+    <select id="selectByPatNo" resultMap="baseMemberMap">
+        select
+        a.*
+        ,b.value as gender_desc
+        ,year( from_days( datediff( now(), a.birthday))) as age
+        from base_member a
+        left join sys_dict b on a.gender = b.code
+        where deleted = 0
+        <if test="patNo!= null and patNo != ''">
+            and
+            a.pat_no =#{patNo}
+        </if>
+
+    </select>
+</mapper>

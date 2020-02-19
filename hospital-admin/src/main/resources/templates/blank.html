@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>空白页-测试</title>
+    <base href="${request.contextPath}">
+    <#include "/header.html">
+</head>
+<body>
+<div id="app">
+    <quota-table :detection="3"></quota-table>
+</div>
+</body>
+<script src="${request.contextPath}/statics/js/modules/book/quota-table.js"></script>
+<script>
+    var vm = new Vue({
+        el: "#app"
+    })
+</script>
+</html>

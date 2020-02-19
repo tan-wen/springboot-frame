@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aoyang.modules.book.dao.BookApplicationDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.aoyang.modules.book.entity.BookApplicationEntity" id="bookApplicationMap">
+        <result property="id" column="id"/>
+        <result property="treatmentId" column="treatment_id"/>
+        <result property="bookRecordId" column="book_record_id"/>
+        <result property="payStatus" column="pay_status"/>
+        <result property="exeStatus" column="exe_status"/>
+        <result property="medicareNo" column="medicare_no"/>
+        <result property="cardNo" column="card_no"/>
+        <result property="insuranceNo" column="insurance_no"/>
+        <result property="ward" column="ward"/>
+        <result property="regNo" column="reg_no"/>
+        <result property="name" column="name"/>
+        <result property="sex" column="sex"/>
+        <result property="bedNo" column="bed_no"/>
+        <result property="dob" column="dob"/>
+        <result property="age" column="age"/>
+        <result property="inLoc" column="in_loc"/>
+        <result property="appDoc" column="app_doc"/>
+        <result property="recLoc" column="rec_loc"/>
+        <result property="appNo" column="app_no"/>
+        <result property="appDate" column="app_date"/>
+        <result property="inPatientNo" column="in_patient_no"/>
+        <result property="telNo" column="tel_no"/>
+        <result property="address" column="address"/>
+        <result property="ordId" column="ord_id"/>
+        <result property="ordName" column="ord_name"/>
+        <result property="price" column="price"/>
+        <result property="perTempl" column="per_templ"/>
+        <result property="oeOrditemId" column="oe_orditem_id"/>
+        <result property="ungent" column="ungent"/>
+        <result property="patientNow" column="patient_now"/>
+        <result property="mainDiagose" column="main_diagose"/>
+        <result property="purpose" column="purpose"/>
+        <result property="content1" column="content_1"/>
+        <result property="content2" column="content_2"/>
+        <result property="content3" column="content_3"/>
+        <result property="content4" column="content_4"/>
+        <result property="content5" column="content_5"/>
+        <result property="content6" column="content_6"/>
+        <result property="content7" column="content_7"/>
+        <result property="hopeDate" column="hope_date"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="lastModifyBy" column="last_modify_by"/>
+        <result property="lastModifyTime" column="last_modify_time"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+    <select id="getMemberById" resultType="com.aoyang.modules.base.entity.BaseMemberEntity">
+        SELECT
+            a.id,
+            a.pat_no,
+            a.name,
+            a.gender,
+            a.birthday,
+            a.phone,
+            a.remark,
+            a.create_by,
+            a.create_time,
+            a.last_modify_by,
+            a.last_modify_time,
+            a.deleted
+        FROM
+            base_member a
+        INNER JOIN
+            book_treatment b ON b.member_id = a.id
+        INNER JOIN
+            book_application c on c.treatment_id = b.id
+        WHERE
+            c.id = #{appId}
+    </select>
+
+    <select id="getAppNotBindBookRecord" resultType="com.aoyang.modules.book.entity.BookApplicationEntity">
+        select A.* from  book_application A
+        left join  base_order B on A.ord_id  = B.his_id  and B.deleted = 0
+        left join  book_treatment C on A.treatment_id = C.id  and C.deleted = 0
+        where A.deleted = 0
+        and A.book_record_id is null
+        and B.book_item_id =#{bookItemId}
+        and C.adm_no = #{admNo}
+    </select>
+
+    <select id="findBooked" resultType="com.aoyang.modules.book.entity.BookApplicationEntity">
+        select
+            A.*
+        from
+            book_application A
+        left join
+            book_treatment T on A.treatment_id = T.id
+        left join
+            book_record R on A.book_record_id = R.id
+        <where>
+            and A.deleted = 0
+            and R.deleted = 0
+            <if test="treatmentCategory != null and treatmentCategory != ''">
+                and T.treatment_category = #{treatmentCategory}
+            </if>
+            <if test="payStatus != null and payStatus.size() > 0">
+                and
+                <foreach collection="payStatus" item="item" open="(" close=")" separator="or">
+                    A.pay_status = #{item}
+                </foreach>
+            </if>
+            <if test="exeStatus != null and exeStatus.size() > 0">
+                and
+                <foreach collection="exeStatus" item="item" open="(" close=")" separator="or">
+                    A.exe_status = #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+
+</mapper>

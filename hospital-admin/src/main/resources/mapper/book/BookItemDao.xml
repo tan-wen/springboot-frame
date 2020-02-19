@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aoyang.modules.book.dao.BookItemDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.aoyang.modules.book.entity.BookItemEntity" id="bookItemMap">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="code" column="code"/>
+        <result property="remark" column="remark"/>
+        <result property="detectionDepId" column="detection_dep_id"/>
+        <result property="detectionDepName" column="detection_dep_name"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="lastModifyBy" column="last_modify_by"/>
+        <result property="lastModifyTime" column="last_modify_time"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+
+    <resultMap id="detectionQuota" type="com.aoyang.modules.book.dto.DetectionQuota">
+        <id property="detectionDepId" column="d_id"/>
+        <result property="detectionDepName" column="d_name"/>
+        <collection property="bookItems"
+                    ofType="com.aoyang.modules.book.dto.BookItem" resultMap="bookItemRm"></collection>
+    </resultMap>
+    
+    <resultMap id="bookItemRm" type="com.aoyang.modules.book.dto.BookItem">
+        <id property="bookItemId" column="bi_id"/>
+        <result property="bookItemName" column="bi_name"/>
+        <collection property="timeSlices" ofType="com.aoyang.modules.book.dto.TimeSlice" columnPrefix="bts_">
+            <id property="timeSliceId" column="id"></id>
+            <result property="startTime" column="start_time"/>
+            <result property="endTime" column="end_time"/>
+        </collection>
+        <collection property="quotaCategories" ofType="com.aoyang.modules.book.dto.QuotaCategory" columnPrefix="qc_">
+            <id property="quotaCategoryId" column="id"/>
+            <result property="name" column="name"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="detectionQuotaOccupied" type="com.aoyang.modules.book.dto.DetectionQuotaOccupied">
+        <id property="id" column="id" />
+        <result property="occupiedNum" column="occupied_num"/>
+        <result property="quotaCategoryId" column="quota_category_id"/>
+        <!--association 用户关系映射 查询单个对象 一个dto关联查询出来一个BookRecordEntity  -->
+        <association property="bookRecord" javaType="com.aoyang.modules.book.dto.BookRecord">
+            <id property="id" column="b_id" />
+            <result property="weekId" column="week_id" />
+            <result property="bookTime" column="book_time" />
+            <association property="timeSlice" javaType="com.aoyang.modules.book.dto.TimeSlice">
+                <result column="time_slice_id"  property="timeSliceId" />
+            </association>
+        </association>
+
+
+
+
+
+
+
+    </resultMap>
+
+
+    <resultMap id="detectionQuotaOccupiedNum" type="com.aoyang.modules.book.dto.DetectionQuotaOccupied">
+        <id property="id" column="id" />
+        <result property="occupiedNum" column="occupied_num"/>
+    </resultMap>
+
+    <select id="listPage" resultMap="bookItemMap">
+        select
+            a.id
+            ,a.name
+            ,a.code
+            ,a.remark
+            ,a.detection_dep_id
+            ,b.name as detection_dep_name
+        from
+            book_item a inner join base_detection_dep b on a.detection_dep_id = b.id
+        where
+            a.deleted = 0
+        <if test="_parameter!= null and _parameter != ''">
+            and
+            a.name like CONCAT(CONCAT('%',#{name}),'%')
+        </if>
+    </select>
+
+    <select id="getQuota" resultMap="detectionQuota">
+        select
+             d.id d_id
+            ,d.name d_name
+
+            ,bi.id bi_id
+            ,bi.name bi_name
+
+            ,bts.id bts_id
+            ,bts.start_time bts_start_time
+            ,bts.end_time bts_end_time
+
+            ,qc.id qc_id
+            ,qc.name qc_name
+        from
+            base_detection_dep d
+        left join
+            book_item bi on d.id = bi.detection_dep_id and bi.deleted = 0
+        left  join
+            base_order bo on bi.id = bo.book_item_id and bo.deleted= 0
+        left join
+            book_item_week iw on bi.id = iw.book_item_id and iw.deleted = 0
+        left join
+            book_week bw on bw.id = iw.week_id and bw.deleted = 0 and bw.week = #{weekId}
+        left join
+            book_week_time_slice wts on wts.week_id = bw.id and wts.deleted = 0
+        left join
+            book_time_slice bts on bts.id = wts.time_slice_id and bts.deleted = 0
+        left join
+            book_quota_category qc on qc.detection_dep_id = d.id and qc.deleted = 0
+        where
+            d.deleted = 0
+        <if test="detectionId != null and detectionId != ''">
+            and d.id = #{detectionId}
+        </if>
+        <if test="category != null and category != ''">
+            and qc.category = #{category}
+        </if>
+        <if test="ordIdList != null and ordIdList!=''">
+            and bo.his_id in
+            <foreach collection="ordIdList" open="(" close=")" separator="," item="item" index="index">
+                #{item}
+            </foreach>
+
+        </if>
+        order by bi.id, wts.position, qc.position
+    </select>
+
+    <select id="getLocalQuota" resultMap="detectionQuota">
+        select
+        d.id d_id
+        ,d.name d_name
+
+        ,bi.id bi_id
+        ,bi.name bi_name
+
+        ,bts.id bts_id
+        ,bts.start_time bts_start_time
+        ,bts.end_time bts_end_time
+
+        ,qc.id qc_id
+        ,qc.name qc_name
+        from
+        base_detection_dep d
+        left join
+        book_item bi on d.id = bi.detection_dep_id and bi.deleted = 0
+        left  join
+        base_order bo on bi.id = bo.book_item_id and bo.deleted= 0
+        left join
+        book_item_week iw on bi.id = iw.book_item_id and iw.deleted = 0
+        left join
+        book_week bw on bw.id = iw.week_id and bw.deleted = 0 and bw.week = #{weekId}
+        left join
+        book_week_time_slice wts on wts.week_id = bw.id and wts.deleted = 0
+        left join
+        book_time_slice bts on bts.id = wts.time_slice_id and bts.deleted = 0
+        left join
+        book_quota_category qc on qc.detection_dep_id = d.id and qc.deleted = 0
+        left join
+        book_quota_category_dep qcd on qcd.quota_category_id=qc.id and qcd.deleted=0
+        left join
+        base_dep bd on qcd.dep_id = bd.id and bd.deleted= 0
+        where
+        d.deleted = 0
+        <if test="detectionId != null and detectionId != ''">
+            and d.id = #{detectionId}
+        </if>
+        <if test="category != null and category != ''">
+            and qc.category = #{category}
+        </if>
+        <if test="depId != null and depId != ''">
+            and bd.his_id = #{depId}
+        </if>
+        <if test="ordIdList != null and ordIdList!=''">
+            and bo.his_id in
+            <foreach collection="ordIdList" open="(" close=")" separator="," item="item" index="index">
+                #{item}
+            </foreach>
+
+        </if>
+        order by bi.id, wts.position, qc.position
+    </select>
+
+    <select id="getOccupiedQuota" resultMap="detectionQuotaOccupied">
+        select week_id,time_slice_id,quota_category_id,book_time,count(*)  as occupied_num from (
+        select DISTINCT A.week_id,A.time_slice_id,D.id as quota_category_id,A.id as b_id,A.book_time from
+        book_record A
+        left join book_application m on m.book_record_id=A.id and m.deleted = 0
+        left join book_treatment n on n.id=m.treatment_id and n.deleted = 0
+            left join
+        book_item B on A.book_item_id = B.id and B.deleted=0
+        left join book_quota_detail C on B.id =C.book_item_id and C.deleted = 0
+        left join book_quota_category D on C.quota_category_id=D.id and D.deleted = 0
+        where A.deleted = 0
+        <if test="weekId != null and weekId != ''">
+            and A.week_id = #{weekId}
+        </if>
+        <if test="bookTime != null and bookTime != ''">
+            and A.book_time = #{bookTime}
+        </if>
+        <if test="bookItemId != null and bookItemId != ''">
+            and A.book_item_id = #{bookItemId}
+        </if>
+        <if test="category != null and category != ''">
+            and D.category = #{category}
+        </if>
+        and n.treatment_category=#{category}
+        ) B group by week_id,time_slice_id,quota_category_id,book_time
+        order by week_id
+    </select>
+
+    <select id="getOccupiedQuotaNum" resultMap="detectionQuotaOccupiedNum">
+        select count(*)  as occupied_num from (
+        select DISTINCT A.week_id,A.time_slice_id,D.id as quota_category_id,A.id as b_id,A.book_time from
+        book_record A left join
+        book_item B on A.book_item_id = B.id and B.deleted=0
+        left join book_quota_detail C on B.id =C.book_item_id and C.deleted = 0
+        left join book_quota_category D on C.quota_category_id=D.id and D.deleted = 0
+        where A.deleted = 0
+        <if test="weekId != null and weekId != ''">
+            and A.week_id = #{weekId}
+        </if>
+        <if test="bookTime != null and bookTime != ''">
+            and A.book_time = #{bookTime}
+        </if>
+        <if test="bookItemId != null and bookItemId != ''">
+            and A.book_item_id = #{bookItemId}
+        </if>
+        <if test="category != null and category != ''">
+            and D.category = #{category}
+        </if>
+        <if test="timeSliceId != null and timeSliceId != ''">
+            and A.time_slice_id = #{timeSliceId}
+        </if>
+        ) B group by week_id,time_slice_id,quota_category_id,book_time
+        order by week_id
+    </select>
+
+    <select id="getByDetectionDepId" resultType="java.lang.Long">
+        select
+            id
+        from
+            book_item bi
+        left join
+
+        where
+            detection_dep_id = #{detectionDeptId}
+    </select>
+
+
+    <select id="getBookItemListByDetectionDeptId" resultMap="bookItemMap">
+        select distinct
+        a.id
+        ,a.name
+        from
+        book_item a inner join base_detection_dep b on a.detection_dep_id = b.id
+        and b.deleted=0
+        where
+        a.deleted = 0
+        <if test="detectionDeptId!= null and detectionDeptId != ''">
+            and
+            b.id = #{detectionDeptId}
+        </if>
+    </select>
+
+</mapper>

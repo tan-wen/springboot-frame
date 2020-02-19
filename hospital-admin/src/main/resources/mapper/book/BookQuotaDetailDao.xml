@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aoyang.modules.book.dao.BookQuotaDetailDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.aoyang.modules.book.entity.BookQuotaDetailEntity" id="bookQuotaDetailMap">
+        <result property="id" column="id"/>
+        <result property="bookItemId" column="book_item_id"/>
+        <result property="weekId" column="week_id"/>
+        <result property="timeSliceId" column="time_slice_id"/>
+        <result property="quotaCategoryId" column="quota_category_id"/>
+        <result property="max" column="max"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="lastModifyBy" column="last_modify_by"/>
+        <result property="lastModifyTime" column="last_modify_time"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+
+    <select id="selectByDectionAndWeek" resultType="com.aoyang.modules.book.entity.BookQuotaDetailEntity">
+        select
+             a.id
+            ,a.book_item_id
+            ,a.week_id
+            ,a.time_slice_id
+            ,a.quota_category_id
+            ,a.max
+        from
+            book_quota_detail a
+        left join
+            book_item b on a.book_item_id = b.id and b.detection_dep_id = #{detectionId} and b.deleted = 0
+        where
+            a.deleted = 0 and a.week_id = #{weekId}
+    </select>
+
+
+</mapper>

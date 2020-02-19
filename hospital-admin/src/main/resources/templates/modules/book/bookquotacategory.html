@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>科室分组</title>
+    <#include "/header.html">
+    <style type="text/css">
+        table tr td:last-child {width: 20%}
+    </style>
+</head>
+<body>
+<div id="rrapp" v-cloak>
+    <div v-show="showList">
+        <div class="grid-btn">
+            <div class="form-group col-sm-2">
+                <input type="text" class="form-control" v-model="q.name" @keyup.enter="query" placeholder="名称">
+            </div>
+            <a class="btn btn-default" @click="query">查询</a>
+			<#if shiro.hasPermission("book:bookquotacategory:save")>
+            <a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+			</#if>
+			<#if shiro.hasPermission("book:bookquotacategory:update")>
+            <a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+			</#if>
+			<#if shiro.hasPermission("book:bookquotacategory:delete")>
+            <a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+			</#if>
+        </div>
+        <table id="jqGrid"></table>
+        <div id="jqGridPager"></div>
+    </div>
+
+    <div v-show="!showList" class="panel panel-default">
+        <div class="panel-heading">{{title}}</div>
+        <form class="form-horizontal">
+            <div class="form-group">
+                <div class="col-sm-2 control-label">名称</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="bookQuotaCategory.name" placeholder="名称"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">医技科室</div>
+                <div class="col-sm-10">
+                    <select class="form-control" v-model="bookQuotaCategory.detectionDepId">
+                        <option v-for="d in detectionDeps" :value="d.id">{{d.name}}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">就诊类型</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" disabled value="住院"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">排序</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="bookQuotaCategory.position" placeholder="排序(200~300)"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">开单科室</div>
+                <div class="col-sm-10">
+                    <table class="table table-hover table-bordered table-striped time-slice-table">
+                        <thead class="text-center text-black">
+                            <tr>
+                                <td>开单科室</td>
+                                <td>操作</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(tr,idx) in trs">
+                                <td >
+                                    <input type="hidden" v-model="tr.id">
+                                    <select class="form-control" v-model="tr.depId">
+                                        <option v-for="d in deps" :value="d.id">{{d.name}}</option>
+                                    </select>
+                                </td>
+                                <td><button type="button" class="form-control btn btn-danger" @click="removeDep(idx,tr.id)">移除</button></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <button class="form-control btn btn-info" type="button" @click="insertDep">添加开单科室</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="alert alert-info alert-dismissible" style="margin-top: 10px;">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        使用<strong>首字母简拼</strong>快捷搜索
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label"></div>
+                <input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+                &nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+            </div>
+        </form>
+    </div>
+</div>
+<script src="${request.contextPath}/statics/js/modules/book/bookquotacategory.js?_${.now?long}"></script>
+</body>
+</html>
