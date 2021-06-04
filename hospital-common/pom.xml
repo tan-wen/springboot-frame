@@ -10,7 +10,7 @@
 	<description>hospital-common</description>
 	<properties>
 		<gsonVersion>2.8.5</gsonVersion>
-		<httpclient.version>4.5.5</httpclient.version>
+		<httpclient.version>4.5.13</httpclient.version>
 	</properties>
 
 	<dependencies>
